@@ -40,6 +40,9 @@ docker compose up --build
 
 → http://localhost:8080
 
+Die API-Dokumentation ist unter http://localhost:8080/swagger-ui/index.html verfügbar; das
+OpenAPI-Dokument liegt unter http://localhost:8080/v3/api-docs.
+
 Ohne Container, direkt als Jar:
 
 ```bash

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,6 +28,22 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 class BookingControllerTest {
 
     @Autowired private MockMvc mockMvc;
+
+        @Test
+        void publishesOpenApiDescriptionForResourcesAndBookings() throws Exception {
+                mockMvc.perform(get("/v3/api-docs"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.info.title").value("Ressourcen-Buchung API"))
+                                .andExpect(jsonPath("$.paths['/api/bookings'].get").exists())
+                                .andExpect(jsonPath("$.paths['/api/bookings'].post").exists())
+                                .andExpect(jsonPath("$.paths['/api/bookings/{id}'].delete").exists())
+                                .andExpect(jsonPath("$.paths['/api/resources'].get").exists())
+                                .andExpect(jsonPath("$.components.schemas.ApiProblem").exists());
+
+                        mockMvc.perform(get("/swagger-ui/index.html"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentTypeCompatibleWith("text/html"));
+        }
 
     @Test
     void rejectsOverlappingBookingsButAllowsAdjacentSlotsAndSupportsFilteringAndCancellation()
