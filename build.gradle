@@ -3,6 +3,7 @@ plugins {
   id 'org.springframework.boot' version '3.5.16'
   id 'io.spring.dependency-management' version '1.1.7'
   id 'com.github.node-gradle.node' version '7.1.0'
+  id 'jacoco'
 }
 
 group = 'de.example'
@@ -30,6 +31,15 @@ dependencies {
 
 tasks.named('test') {
   useJUnitPlatform()
+}
+
+tasks.named('jacocoTestReport') {
+  dependsOn tasks.named('test')
+  reports {
+    xml.required = true
+    html.required = true
+    csv.required = false
+  }
 }
 
 // Only the runnable jar, no additional "-plain" jar — one file, no guessing which one to start.

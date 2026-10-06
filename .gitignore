@@ -5,6 +5,7 @@ build/
 # Node
 frontend/node_modules/
 frontend/dist/
+frontend/coverage/
 
 # TypeScript incremental build info (written by `tsc -b`)
 *.tsbuildinfo

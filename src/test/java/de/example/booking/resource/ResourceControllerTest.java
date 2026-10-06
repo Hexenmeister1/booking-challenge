@@ -2,6 +2,7 @@ package de.example.booking.resource;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,11 +34,44 @@ class ResourceControllerTest {
     }
 
     @Test
+    void returnsAResourceById() throws Exception {
+        mockMvc
+                .perform(get("/api/resources/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Besprechungsraum Nord"))
+                .andExpect(jsonPath("$.category").value("ROOM"))
+                .andExpect(jsonPath("$.location").value("Haus 1, 2. OG"))
+                .andExpect(jsonPath("$.capacity").value(8));
+    }
+
+    @Test
     void reportsAnUnknownResourceAsProblemDetail() throws Exception {
         mockMvc
                 .perform(get("/api/resources/999999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Nicht gefunden"))
                 .andExpect(jsonPath("$.detail").value("Es gibt keine Ressource mit der ID 999999"));
+    }
+
+    @Test
+    void doesNotUseTheSpaFallbackForUnknownApiRoutes() throws Exception {
+        mockMvc.perform(get("/api/not-a-route")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void servesTheSpaEntryPointForFrontendDeepLinks() throws Exception {
+        mockMvc
+                .perform(get("/resources/room/1"))
+                .andExpect(status().isOk())
+            .andExpect(content().string("<!doctype html><title>test spa entry</title>\n"));
+    }
+
+    @Test
+    void servesAnExistingStaticResourceDirectly() throws Exception {
+        mockMvc
+                .perform(get("/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("<!doctype html><title>test spa entry</title>\n"));
     }
 }

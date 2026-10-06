@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ResourceTable } from "./ResourceTable";
 
@@ -28,6 +29,16 @@ afterEach(() => {
 });
 
 describe("ResourceTable", () => {
+  it("zeigt einen Ladeindikator solange die Anfrage offen ist", () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    render(<ResourceTable />);
+
+    expect(
+      screen.getByRole("progressbar", { name: "Ressourcen werden geladen" }),
+    ).toBeInTheDocument();
+  });
+
   it("zeigt die vom Backend gelieferten Ressourcen", async () => {
     stubFetchWith({
       ok: true,
@@ -65,5 +76,26 @@ describe("ResourceTable", () => {
     expect(
       screen.getByRole("button", { name: "Erneut versuchen" }),
     ).toBeInTheDocument();
+  });
+
+  it("lädt die Ressourcen nach einem fehlgeschlagenen Aufruf erneut", async () => {
+    const fetch = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("Verbindung fehlgeschlagen"))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(resources),
+      });
+    vi.stubGlobal("fetch", fetch);
+    const user = userEvent.setup();
+
+    render(<ResourceTable />);
+
+    await screen.findByText("Verbindung fehlgeschlagen");
+    await user.click(screen.getByRole("button", { name: "Erneut versuchen" }));
+
+    expect(await screen.findByText("Besprechungsraum Nord")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

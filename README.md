@@ -137,3 +137,9 @@ Bitte lade deine Lösung **nicht** in ein öffentliches Repository und öffne ke
   (es liegt unter `build/nodejs`).
 - **Sonst:** melde dich einfach. Ein Setup-Problem soll dich keine Zeit von der eigentlichen
   Aufgabe kosten.
+
+
+## Test coverage ###
+
+npm --prefix frontend run test:coverage
+./gradlew jacocoTestReport

@@ -17,6 +17,18 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     css: false,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/test/**",
+        "src/main.tsx",
+        "src/theme.ts",
+        "src/vite-env.d.ts",
+      ],
+    },
     // MUI ships ESM directory imports that Vitest cannot resolve unless they are inlined.
     server: { deps: { inline: [/@mui\//] } },
   },
