@@ -5,9 +5,13 @@ import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { BookingList } from "./features/resources/BookingList";
 import { ResourceTable } from "./features/resources/ResourceTable";
 
 export default function App() {
+  const [bookingRefreshKey, setBookingRefreshKey] = useState(0);
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <AppBar position="static" elevation={0}>
@@ -26,18 +30,12 @@ export default function App() {
               Buchbare Ressourcen
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Diese Liste ist das mitgelieferte Beispiel-Feature. Sie zeigt, wie
-              Backend und Frontend in diesem Projekt zusammenspielen — und ist
-              gleichzeitig der Ausgangspunkt für deine Aufgabe: Diese Ressourcen
-              lassen sich noch nicht buchen. Die Aufgabenstellung steht in{" "}
-              <Box component="code" sx={{ fontFamily: "monospace" }}>
-                AUFGABE.md
-              </Box>
-              .
+              Räume, Geräte und Fahrzeuge buchen und bestehende Termine verwalten.
             </Typography>
           </Box>
 
-          <ResourceTable />
+          <ResourceTable onBookingChanged={() => setBookingRefreshKey((key) => key + 1)} />
+          <BookingList refreshKey={bookingRefreshKey} />
         </Stack>
       </Container>
     </Box>

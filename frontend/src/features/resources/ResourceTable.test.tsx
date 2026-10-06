@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ResourceTable } from "./ResourceTable";
@@ -54,6 +54,50 @@ describe("ResourceTable", () => {
     expect(screen.getByText("Ultraschallgerät")).toBeInTheDocument();
     // One row per resource plus the header row.
     expect(screen.getAllByRole("row")).toHaveLength(resources.length + 1);
+  });
+
+  it("zeigt den Konfliktgrund beim Versuch, eine belegte Ressource zu buchen", async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(resources),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 409,
+        statusText: "Conflict",
+        json: () =>
+          Promise.resolve({
+            title: "Zeitraum nicht verfügbar",
+            detail: "Besprechungsraum Nord ist im gewählten Zeitraum bereits gebucht.",
+          }),
+      });
+    vi.stubGlobal("fetch", fetch);
+    const user = userEvent.setup();
+
+    render(<ResourceTable />);
+    await screen.findByText("Besprechungsraum Nord");
+    await user.click(screen.getAllByRole("button", { name: "Buchen" })[0]);
+    const dialog = await screen.findByRole("dialog");
+    const form = within(dialog);
+    fireEvent.change(await form.findByLabelText(/Gebucht von/), {
+      target: { value: "Ada" },
+    });
+    fireEvent.change(await form.findByLabelText(/Beginn/), {
+      target: { value: "2032-04-05T09:00" },
+    });
+    fireEvent.change(await form.findByLabelText(/Ende/), {
+      target: { value: "2032-04-05T10:00" },
+    });
+    await user.click(form.getByRole("button", { name: "Buchen" }));
+
+    expect(
+      await screen.findByText(
+        "Besprechungsraum Nord ist im gewählten Zeitraum bereits gebucht.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("zeigt die Begründung des Backends statt einer leeren Tabelle", async () => {

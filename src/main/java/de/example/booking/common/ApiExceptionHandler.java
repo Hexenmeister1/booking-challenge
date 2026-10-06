@@ -1,5 +1,7 @@
 package de.example.booking.common;
 
+import de.example.booking.booking.BookingConflictException;
+import de.example.booking.booking.InvalidBookingException;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,22 @@ public class ApiExceptionHandler {
         ProblemDetail problem =
                 ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
         problem.setTitle("Nicht gefunden");
+        return problem;
+    }
+
+    @ExceptionHandler(BookingConflictException.class)
+    ProblemDetail handleBookingConflict(BookingConflictException exception) {
+        ProblemDetail problem =
+                ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setTitle("Zeitraum nicht verfügbar");
+        return problem;
+    }
+
+    @ExceptionHandler(InvalidBookingException.class)
+    ProblemDetail handleInvalidBooking(InvalidBookingException exception) {
+        ProblemDetail problem =
+                ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problem.setTitle("Ungültiger Buchungszeitraum");
         return problem;
     }
 
